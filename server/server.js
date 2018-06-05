@@ -1,57 +1,26 @@
-var mongoose = require('mongoose');
+const express = require('express');
+const bodyParser = require('body-parser');
 
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+var {mongoose} = require('./db/mongoose');
+var {Todo} = require('./models/todo');
+var {User} = require('./models/user');
 
-//save new something
-// var Todo = mongoose.model('Todo', {
-//     text: {
-//         type: String,
-//         required: true,
-//         minlength: 1,
-//         trim: true
-//     },
-//     completed: {
-//         type: Boolean,
-//         default: false
-//     },
-//     completedAt: {
-//         type: Number,
-//         default: null
-//     }
-// });
+var app = express();
 
-// var todotest = new Todo({
-//     text: '  Edit this video '
-// });
+app.use(bodyParser.json());
 
-// todotest.save().then((result) => {
-//     console.log(result);
-// }).catch((err) => {
-//     console.log('Unable to save todo', err);
-// });
+app.post('/todos', (req, res) => {
+    var todo = new Todo({
+        text: req.body.text
+    });
 
-var User = mongoose.model('User', {
-    email: {
-        type: String,
-        required: true,
-        trim: true,
-        minlength: 1,
-        validate: {
-            validator: function(v) {
-                return /\w+\.?\w+@\w+\.\w{2,}/.test(v);
-            },
-            message: '{VALUE} is not a valid email'
-        }
-    }
+    todo.save().then((doc) => {
+        res.send(doc);
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
 });
 
-var user = new User({
-    email: 'vmcruz16@gmail.com'
-});
-
-user.save().then((result) => {
-    console.log(result);
-}).catch((err) => {
-    console.log(err);
+app.listen(3000, () => {
+    console.log('Listening on port: 3000');
 });
